@@ -14,19 +14,15 @@ part 'authentication_state.dart';
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   final AuthenticationRepository _authenticationRepository;
   final UserRepository _userRepository;
-  final CommunicationRepository _communicationRepository;
   StreamSubscription<AuthenticationStatus> _authenticationStatusSubscription;
 
   AuthenticationBloc({
     @required AuthenticationRepository authenticationRepository,
     @required UserRepository userRepository,
-    @required CommunicationRepository communicationRepository,
   })  : assert(authenticationRepository != null),
         assert(userRepository != null),
-        assert(communicationRepository != null),
         _authenticationRepository = authenticationRepository,
         _userRepository = userRepository,
-        _communicationRepository = communicationRepository,
         super(const AuthenticationState.unknown()) {
     _authenticationStatusSubscription = _authenticationRepository.status.listen(
       (status) => add(AuthenticationStatusChanged(status)),
@@ -59,12 +55,9 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         return const AuthenticationState.unauthenticated();
       case AuthenticationStatus.authenticated:
         final user = await _tryGetUser();
-        if (user != null) {
-          _communicationRepository.start("humberto");
-          return AuthenticationState.authenticated(user);
-        }
-
-        return const AuthenticationState.unauthenticated();
+        return user != null
+            ? AuthenticationState.authenticated(user)
+            : const AuthenticationState.unauthenticated();
       default:
         return const AuthenticationState.unknown();
     }

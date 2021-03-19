@@ -9,6 +9,5 @@ void main() {
   runApp(App(
     authenticationRepository: AuthenticationRepository(),
     userRepository: UserRepository(),
-    communicationRepository: CommunicationRepository(),
   ));
 }

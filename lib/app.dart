@@ -13,13 +13,11 @@ import 'package:communication_repository/communication_repository.dart';
 class App extends StatelessWidget {
   final AuthenticationRepository authenticationRepository;
   final UserRepository userRepository;
-  final CommunicationRepository communicationRepository;
 
   const App({
     Key key,
     @required this.authenticationRepository,
     @required this.userRepository,
-    @required this.communicationRepository,
   }) : super(key: key);
 
   @override
@@ -30,7 +28,6 @@ class App extends StatelessWidget {
         create: (_) => AuthenticationBloc(
           authenticationRepository: authenticationRepository,
           userRepository: userRepository,
-          communicationRepository: communicationRepository,
         ),
         child: AppView(),
       ),

@@ -35,7 +35,7 @@ class AuthenticationRepository {
     final url = Uri.parse("http://$_host:$_port$_path");
     final response = await http.post(url, body: body);
 
-    if (response.statusCode == HttpStatus.OK) {
+    if (response.statusCode == HttpStatus.ok) {
       _controller.add(AuthenticationStatus.authenticated);
     }
   }
