@@ -2,14 +2,31 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
-enum AuthenticationStatus {
-  unkown,
-  authenticated,
-  unauthenticated,
+abstract class AuthenticationStatus extends Equatable {
+  const AuthenticationStatus();
+
+  @override
+  List<Object> get props => [];
 }
+
+class Unknown extends AuthenticationStatus {}
+
+class Authenticated extends AuthenticationStatus {
+  final String uuid;
+  final String username;
+
+  Authenticated(this.uuid, this.username);
+
+  @override
+  List<Object> get props => [uuid, username];
+}
+
+class Unauthenticated extends AuthenticationStatus {}
 
 class AuthenticationRepository {
   final _controller = StreamController<AuthenticationStatus>();
@@ -19,7 +36,7 @@ class AuthenticationRepository {
   final String _path = "/user/login";
 
   Stream<AuthenticationStatus> get status async* {
-    yield AuthenticationStatus.unauthenticated;
+    yield Unauthenticated();
     yield* _controller.stream;
   }
 
@@ -36,12 +53,12 @@ class AuthenticationRepository {
     final response = await http.post(url, body: body);
 
     if (response.statusCode == HttpStatus.ok) {
-      _controller.add(AuthenticationStatus.authenticated);
+      _controller.add(Authenticated(Uuid().v4(), username));
     }
   }
 
   void logOut() {
-    _controller.add(AuthenticationStatus.unauthenticated);
+    _controller.add(Unauthenticated());
   }
 
   void dispose() => _controller.close();

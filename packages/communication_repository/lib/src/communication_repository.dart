@@ -26,4 +26,13 @@ class CommunicationRepository {
       _controller.add(ReceiveData(data));
     });
   }
+
+  void sendData(dynamic data) {
+    _channel?.sink.add(data);
+  }
+
+  void dispose() {
+    _channel?.sink.close();
+    _controller.close();
+  }
 }

@@ -6,8 +6,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:user_repository/user_repository.dart';
 
-import 'package:communication_repository/communication_repository.dart';
-
 part 'authentication_event.dart';
 part 'authentication_state.dart';
 
@@ -23,7 +21,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         assert(userRepository != null),
         _authenticationRepository = authenticationRepository,
         _userRepository = userRepository,
-        super(const AuthenticationState.unknown()) {
+        super(const UnknownState()) {
     _authenticationStatusSubscription = _authenticationRepository.status.listen(
       (status) => add(AuthenticationStatusChanged(status)),
     );
@@ -50,16 +48,14 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   Future<AuthenticationState> _mapAuthenticationStatusChangedToState(
     AuthenticationStatusChanged event,
   ) async {
-    switch (event.status) {
-      case AuthenticationStatus.unauthenticated:
-        return const AuthenticationState.unauthenticated();
-      case AuthenticationStatus.authenticated:
-        final user = await _tryGetUser();
-        return user != null
-            ? AuthenticationState.authenticated(user)
-            : const AuthenticationState.unauthenticated();
-      default:
-        return const AuthenticationState.unknown();
+    if (event.status is Unauthenticated) {
+      return UnauthenticatedState();
+    } else if (event.status is Authenticated) {
+      final status = event.status as Authenticated;
+      final user = _userRepository.setUser(status.uuid, status.username);
+      return AuthenticatedState(user);
+    } else {
+      return UnknownState();
     }
   }
 

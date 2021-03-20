@@ -18,15 +18,18 @@ class LoginForm extends StatelessWidget {
       },
       child: Align(
         alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _UsernameInput(),
-            const Padding(padding: EdgeInsets.all(12)),
-            _PasswordInput(),
-            const Padding(padding: EdgeInsets.all(12)),
-            _LoginButton(),
-          ],
+        child: Container(
+          margin: EdgeInsets.only(left: 24, right: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _UsernameInput(),
+              const Padding(padding: EdgeInsets.all(8)),
+              _PasswordInput(),
+              const Padding(padding: EdgeInsets.all(8)),
+              _LoginButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -44,6 +47,11 @@ class _UsernameInput extends StatelessWidget {
           onChanged: (username) => context.read<LoginBloc>().add(LoginUsernameChanged(username)),
           decoration: InputDecoration(
             labelText: 'username',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(8),
+              ),
+            ),
             errorText: state.username.invalid ? 'invalid username' : null,
           ),
         );
@@ -64,6 +72,11 @@ class _PasswordInput extends StatelessWidget {
           obscureText: true,
           decoration: InputDecoration(
             labelText: 'password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(8),
+              ),
+            ),
             errorText: state.password.invalid ? 'invalid password' : null,
           ),
         );
@@ -78,17 +91,30 @@ class _LoginButton extends StatelessWidget {
     return BlocBuilder<LoginBloc, LoginState>(
       buildWhen: (previous, current) => previous.status != current.status,
       builder: (context, state) {
-        return state.status.isSubmissionInProgress
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                key: const Key('loginForm_continue_raisedButton'),
-                child: const Text('Login'),
-                onPressed: state.status.isValidated
-                    ? () {
-                        context.read<LoginBloc>().add(const LoginSubmitted());
-                      }
-                    : null,
-              );
+        if (state.status.isSubmissionInProgress) {
+          return const CircularProgressIndicator();
+        } else {
+          return ElevatedButton(
+            key: const Key('loginForm_continue_raisedButton'),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: const Center(child: Text('Login')),
+            ),
+            onPressed: () {
+              if (state.status.isValidated) {
+                context.read<LoginBloc>().add(const LoginSubmitted());
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(8),
+                ),
+              ),
+            ),
+          );
+        }
       },
     );
   }
