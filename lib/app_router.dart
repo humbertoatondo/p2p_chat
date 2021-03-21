@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:p2p_chat/chat/chat.dart';
 import 'package:p2p_chat/home/home.dart';
 import 'package:p2p_chat/login/login.dart';
+import 'package:peer_repository/peer_repository.dart';
 
 class AppRouter {
   Route<dynamic> generateRoutes(RouteSettings settings) {
@@ -17,6 +18,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (context) => HomePage(
             communicationRepository: CommunicationRepository(),
+            peerRepository: PeerRepository(),
           ),
         );
       case '/chat':

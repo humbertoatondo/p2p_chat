@@ -7,11 +7,20 @@ abstract class CommunicationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class CommunicationEventOccurred extends CommunicationEvent {
+class SocketEventOccurred extends CommunicationEvent {
   final SocketCommunicationEvent socketEvent;
 
-  const CommunicationEventOccurred(this.socketEvent);
+  const SocketEventOccurred(this.socketEvent);
 
   @override
   List<Object> get props => [socketEvent];
+}
+
+class StartPeerConnectionRequested extends CommunicationEvent {
+  final String username;
+
+  const StartPeerConnectionRequested(this.username);
+
+  @override
+  List<Object> get props => [username];
 }

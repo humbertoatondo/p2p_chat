@@ -10,7 +10,7 @@ part 'socket_communication_event.dart';
 class CommunicationRepository {
   final _controller = StreamController<SocketCommunicationEvent>();
 
-  WebSocketChannel? _channel;
+  WebSocketChannel _channel;
 
   final String _host = "192.168.1.89";
   final String _port = "3000";
@@ -24,13 +24,13 @@ class CommunicationRepository {
     final url = Uri.parse("ws://$_host:$_port$_path?username=$username");
     _channel = WebSocketChannel.connect(url);
 
-    _channel?.stream.listen((data) {
+    _channel.stream.listen((data) {
       _controller.add(ReceiveData(data));
     });
   }
 
   void sendData(dynamic data) {
-    _channel?.sink.add(data);
+    _channel.sink.add(data);
   }
 
   Future<List<String>> searchUsers(String username) async {
@@ -46,7 +46,7 @@ class CommunicationRepository {
   }
 
   void dispose() {
-    _channel?.sink.close();
+    _channel.sink.close();
     _controller.close();
   }
 }

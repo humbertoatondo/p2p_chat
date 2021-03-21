@@ -39,6 +39,8 @@ dependencies:
     path: packages/user_repository
   communication_repository:
     path: packages/communication_repository
+  peer_repository:
+    path: packages/peer_repository
 
 dev_dependencies:
   flutter_test:

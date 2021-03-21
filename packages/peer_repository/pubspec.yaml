@@ -1,0 +1,14 @@
+name: peer_repository
+description: Dart package which manages peer connections utilizing webrtc.
+publish_to: none
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  sdp_transform: ^0.2.0
+  flutter_webrtc: ^0.5.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

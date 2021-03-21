@@ -5,6 +5,7 @@ import 'package:p2p_chat/authentication/authentication.dart';
 import 'package:p2p_chat/communication/communication.dart';
 import 'package:p2p_chat/home/bloc/home_bloc.dart';
 import 'package:p2p_chat/home/views/chat_list_view.dart';
+import 'package:peer_repository/peer_repository.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:p2p_chat/splash/views/splash_page.dart';
 
@@ -12,12 +13,18 @@ part 'search_app_bar.dart';
 part 'user_search_view.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key key, CommunicationRepository communicationRepository})
-      : assert(communicationRepository != null),
+  HomePage({
+    Key key,
+    CommunicationRepository communicationRepository,
+    PeerRepository peerRepository,
+  })  : assert(communicationRepository != null),
+        assert(peerRepository != null),
         _communicationRepository = communicationRepository,
+        _peerRepository = peerRepository,
         super(key: key);
 
   final CommunicationRepository _communicationRepository;
+  final PeerRepository _peerRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +34,7 @@ class HomePage extends StatelessWidget {
           lazy: false,
           create: (context) => CommunicationBloc(
             communicationRepository: _communicationRepository,
+            peerRepository: _peerRepository,
             user: context.read<AuthenticationBloc>().state is AuthenticatedState
                 ? (context.read<AuthenticationBloc>().state as AuthenticatedState).user
                 : User.empty,

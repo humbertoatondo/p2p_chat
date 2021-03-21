@@ -39,6 +39,7 @@ class UserListViewCell extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
+        context.read<CommunicationBloc>().add(StartPeerConnectionRequested(username));
         Navigator.of(context).pushNamed(
           '/chat',
           arguments: username,
