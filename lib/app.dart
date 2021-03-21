@@ -1,14 +1,13 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:p2p_chat/app_router.dart';
 import 'package:p2p_chat/authentication/bloc/authentication_bloc.dart';
 import 'package:p2p_chat/home/views/home_page.dart';
 
 import 'package:p2p_chat/login/views/login_page.dart';
 import 'package:p2p_chat/splash/views/splash_page.dart';
 import 'package:user_repository/user_repository.dart';
-
-import 'package:communication_repository/communication_repository.dart';
 
 class App extends StatelessWidget {
   final AuthenticationRepository authenticationRepository;
@@ -41,6 +40,7 @@ class AppView extends StatefulWidget {
 }
 
 class _AppViewState extends State<AppView> {
+  final _router = AppRouter();
   final _navigatorKey = GlobalKey<NavigatorState>();
 
   NavigatorState get _navigator => _navigatorKey.currentState;
@@ -53,13 +53,13 @@ class _AppViewState extends State<AppView> {
         return BlocListener<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {
             if (state is AuthenticatedState) {
-              _navigator.pushAndRemoveUntil(
-                HomePage.route(),
+              _navigator.pushNamedAndRemoveUntil(
+                "/home",
                 (route) => false,
               );
             } else if (state is UnauthenticatedState) {
-              _navigator.pushAndRemoveUntil(
-                LoginPage.route(),
+              _navigator.pushNamedAndRemoveUntil(
+                "/login",
                 (route) => false,
               );
             }
@@ -67,7 +67,8 @@ class _AppViewState extends State<AppView> {
           child: child,
         );
       },
-      onGenerateRoute: (_) => SplashPage.route(),
+      initialRoute: "/login",
+      onGenerateRoute: _router.generateRoutes,
     );
   }
 }

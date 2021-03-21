@@ -58,13 +58,4 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       return UnknownState();
     }
   }
-
-  Future<User> _tryGetUser() async {
-    try {
-      final user = await _userRepository.getUser();
-      return user;
-    } on Exception {
-      return null;
-    }
-  }
 }

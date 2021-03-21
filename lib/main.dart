@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:p2p_chat/app.dart';
 import 'package:user_repository/user_repository.dart';
 
-import 'package:communication_repository/communication_repository.dart';
-
 void main() {
   runApp(App(
     authenticationRepository: AuthenticationRepository(),

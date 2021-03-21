@@ -23,7 +23,7 @@ class CommunicationBloc extends Bloc<CommunicationEvent, CommunicationState> {
         _communicationRepository = communicationRepository,
         _user = user,
         super(CommunicationInitial()) {
-    _communicationRepository.startListening(user.username);
+    _communicationRepository.startListening(_user.username);
     _communicationEventSubscription = _communicationRepository.event.listen((event) {
       add(CommunicationEventOccurred(event));
     });
