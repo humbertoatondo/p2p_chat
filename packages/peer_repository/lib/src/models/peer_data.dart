@@ -5,5 +5,6 @@ class PeerData {
   PeerData(this.peerConnection);
 
   RTCPeerConnection peerConnection;
+  RTCDataChannel dataChannel;
   List<IceCandidate> iceCandidates = [];
 }

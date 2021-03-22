@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:peer_repository/peer_repository.dart';
 import 'package:peer_repository/src/models/models.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 
-class DataTransferType extends Equatable {
+part 'data_channel_event.dart';
+
+class DataTransferType {
   const DataTransferType._();
   static const String offer = "offer";
   static const String answer = "answer";
@@ -16,7 +21,14 @@ class DataTransferType extends Equatable {
 }
 
 class PeerRepository {
+  // Map where all peer connections are stored.
   Map<String, PeerData> _peerConnections = Map();
+  // Controller in charge of streaming events to tha main app.
+  final _controller = StreamController<DataChannelEvent>();
+
+  Stream<DataChannelEvent> get event async* {
+    yield* _controller.stream;
+  }
 
   Future<void> _createPeerConnection(String username) async {
     Map<String, dynamic> configuration = {
@@ -39,28 +51,17 @@ class PeerRepository {
     _peerConnections[username] = PeerData(peerConnection);
   }
 
-  void _createDataChannel(String username) {
-    _peerConnections[username]
+  Future<void> _createDataChannel(String username) async {
+    _peerConnections[username].dataChannel = await _peerConnections[username]
         .peerConnection
-        .createDataChannel("$username channel", RTCDataChannelInit())
-        .then((dataChannel) {
-      dataChannel.onDataChannelState = (state) {
-        print("$state");
-      };
+        .createDataChannel("$username channel", RTCDataChannelInit());
 
-      dataChannel.onMessage = (message) {
-        print(message.text);
-      };
-    });
+    _peerConnections[username].dataChannel.onDataChannelState = (state) {
+      print("DC message: $state");
+    };
 
-    _peerConnections[username].peerConnection.onDataChannel = (dataChannel) {
-      dataChannel.onMessage = (message) {
-        print(message);
-      };
-
-      dataChannel.onDataChannelState = (state) {
-        print("$state");
-      };
+    _peerConnections[username].dataChannel.onMessage = (message) {
+      _controller.add(ReceiveTextMessage(message.text));
     };
   }
 
@@ -68,7 +69,7 @@ class PeerRepository {
     // Start a peer connection for this username.
     await _createPeerConnection(receiver);
     // Create a data channel to send and receive messages.
-    _createDataChannel(receiver);
+    await _createDataChannel(receiver);
 
     RTCSessionDescription description =
         await _peerConnections[receiver].peerConnection.createOffer();
@@ -184,5 +185,9 @@ class PeerRepository {
           RTCIceCandidate(session["candidate"], session["sdpMid"], session["sdpMlineIndex"]);
       await _peerConnections[receiver].peerConnection.addCandidate(candidate);
     });
+  }
+
+  void dispose() {
+    _controller.close();
   }
 }
