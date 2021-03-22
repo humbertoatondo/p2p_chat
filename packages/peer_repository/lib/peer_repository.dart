@@ -1,1 +1,1 @@
-export 'src/peer_reposiotry.dart';
+export 'src/peer_repository.dart';

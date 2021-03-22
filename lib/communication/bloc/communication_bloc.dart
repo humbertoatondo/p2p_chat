@@ -42,15 +42,20 @@ class CommunicationBloc extends Bloc<CommunicationEvent, CommunicationState> {
     if (event is SocketEventOccurred) {
       if (event.socketEvent is ReceiveData) {
         final socketEvent = event.socketEvent as ReceiveData;
-        print(socketEvent.data);
+        final answer = await _peerRepository.receiveData(socketEvent.data);
+        if (answer.containsKey("type")) {
+          final encodedAnswer = json.encode(answer);
+          _communicationRepository.sendData(encodedAnswer);
+        }
       } else if (event.socketEvent is SendData) {
         final socketEvent = event.socketEvent as SendData;
         _communicationRepository.sendData(socketEvent.data);
       }
     } else if (event is StartPeerConnectionRequested) {
-      var offer = await _peerRepository.createOffer(event.username);
+      var offer = await _peerRepository.createOffer(_user.username, event.receiverUsername);
       var encodedOffer = json.encode(offer);
-      this.add(SocketEventOccurred(SendData(encodedOffer)));
+      _communicationRepository.sendData(encodedOffer);
+      print(encodedOffer);
     }
   }
 

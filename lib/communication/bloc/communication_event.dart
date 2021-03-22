@@ -17,10 +17,10 @@ class SocketEventOccurred extends CommunicationEvent {
 }
 
 class StartPeerConnectionRequested extends CommunicationEvent {
-  final String username;
+  final String receiverUsername;
 
-  const StartPeerConnectionRequested(this.username);
+  const StartPeerConnectionRequested(this.receiverUsername);
 
   @override
-  List<Object> get props => [username];
+  List<Object> get props => [receiverUsername];
 }

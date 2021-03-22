@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class IceCandidate {
@@ -10,4 +12,14 @@ class IceCandidate {
   String candidate;
   String sdpMid;
   int sdpMlineIndex;
+
+  @override
+  String toString() {
+    final candidateObject = {
+      "candidate": this.candidate,
+      "sdpMid": this.sdpMid,
+      "sdpMlineIndex": this.sdpMlineIndex,
+    };
+    return json.encode(candidateObject);
+  }
 }
