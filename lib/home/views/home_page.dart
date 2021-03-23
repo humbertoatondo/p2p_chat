@@ -5,6 +5,7 @@ import 'package:p2p_chat/authentication/authentication.dart';
 import 'package:p2p_chat/communication/communication.dart';
 import 'package:p2p_chat/home/bloc/home_bloc.dart';
 import 'package:p2p_chat/home/views/chat_list_view.dart';
+import 'package:p2p_chat/peer/peer.dart';
 import 'package:peer_repository/peer_repository.dart';
 import 'package:user_repository/user_repository.dart';
 import 'package:p2p_chat/splash/views/splash_page.dart';
@@ -43,6 +44,11 @@ class HomePage extends StatelessWidget {
         BlocProvider(
           create: (context) => HomeBloc(
             communicationRepository: _communicationRepository,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => PeerBloc(
+            peerRepository: _peerRepository,
           ),
         ),
       ],

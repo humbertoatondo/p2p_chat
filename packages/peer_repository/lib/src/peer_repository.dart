@@ -30,6 +30,13 @@ class PeerRepository {
     yield* _controller.stream;
   }
 
+  void sendMessage(String receiver, String message) {
+    _peerConnections[receiver].dataChannel.send(RTCDataChannelMessage(message));
+    _peerConnections.forEach((key, value) {
+      print("$key: $value");
+    });
+  }
+
   Future<void> _createPeerConnection(String username) async {
     Map<String, dynamic> configuration = {
       "iceServers": [
@@ -54,18 +61,22 @@ class PeerRepository {
   Future<void> _createDataChannel(String username) async {
     _peerConnections[username].dataChannel = await _peerConnections[username]
         .peerConnection
-        .createDataChannel("$username channel", RTCDataChannelInit());
+        .createDataChannel("channel", RTCDataChannelInit());
 
     _peerConnections[username].dataChannel.onDataChannelState = (state) {
       print("DC message: $state");
     };
 
     _peerConnections[username].dataChannel.onMessage = (message) {
-      _controller.add(ReceiveTextMessage(message.text));
+      _controller.add(ReceiveTextMessage(message.text, username));
+      print(message.text);
     };
   }
 
   Future<Map<String, dynamic>> createOffer(String sender, String receiver) async {
+    if (_peerConnections.containsKey(receiver)) {
+      return {"status": "ok"};
+    }
     // Start a peer connection for this username.
     await _createPeerConnection(receiver);
     // Create a data channel to send and receive messages.
@@ -116,8 +127,11 @@ class PeerRepository {
         // Test data channel
         _peerConnections[map["sender"]].peerConnection.onDataChannel = (dataChannel) {
           dataChannel.onDataChannelState = (state) {
-            dataChannel.send(RTCDataChannelMessage("Mensaje de prueba"));
             print("$state");
+          };
+
+          dataChannel.onMessage = (message) {
+            print(message.text);
           };
         };
         // Set remote descripiton
@@ -129,15 +143,15 @@ class PeerRepository {
         // Set remote description
         await _setRemoteDescription(map["sdp"], DataTransferType.answer, map["sender"]);
         // Get ice candidates
-        _peerConnections[map["sender"]].peerConnection.onDataChannel = (dataChannel) {
-          dataChannel.onMessage = (message) {
-            print(message);
-          };
+        // _peerConnections[map["sender"]].peerConnection.onDataChannel = (dataChannel) {
+        //   dataChannel.onMessage = (message) {
+        //     print(message.text);
+        //   };
 
-          dataChannel.onDataChannelState = (state) {
-            print("$state");
-          };
-        };
+        //   dataChannel.onDataChannelState = (state) {
+        //     print("$state");
+        //   };
+        // };
         return _getIceCandidates(map["receiver"], map["sender"]);
         break;
       case DataTransferType.candidates:
@@ -189,5 +203,8 @@ class PeerRepository {
 
   void dispose() {
     _controller.close();
+    _peerConnections.forEach((key, value) {
+      value.dataChannel.close();
+    });
   }
 }

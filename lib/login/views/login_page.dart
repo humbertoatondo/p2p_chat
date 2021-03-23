@@ -5,10 +5,6 @@ import 'package:p2p_chat/login/bloc/login_bloc.dart';
 import 'package:p2p_chat/login/views/login_form.dart';
 
 class LoginPage extends StatelessWidget {
-  static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => LoginPage());
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

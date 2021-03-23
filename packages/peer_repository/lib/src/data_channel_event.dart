@@ -9,18 +9,20 @@ abstract class DataChannelEvent extends Equatable {
 
 class ReceiveTextMessage extends DataChannelEvent {
   final String message;
+  final String sender;
 
-  const ReceiveTextMessage(this.message);
+  const ReceiveTextMessage(this.message, this.sender);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, sender];
 }
 
 class SendTextMessage extends DataChannelEvent {
   final String message;
+  final String receiver;
 
-  const SendTextMessage(this.message);
+  const SendTextMessage(this.message, this.receiver);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, receiver];
 }

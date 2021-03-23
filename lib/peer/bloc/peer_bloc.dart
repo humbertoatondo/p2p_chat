@@ -32,10 +32,11 @@ class PeerBloc extends Bloc<PeerEvent, PeerState> {
       if (dataChannelEvent is ReceiveTextMessage) {
         // TODO: Create chat repository.
         // TODO: Add the received message to chat repository.
+        print("ReceiveTextMessage: ${dataChannelEvent.message}");
       } else if (dataChannelEvent is SendTextMessage) {
-        // Receiver
-        // Message
-        // TODO: Create function in peer repository to send message
+        print("${dataChannelEvent.receiver}, ${dataChannelEvent.message}");
+        _peerRepository.sendMessage(dataChannelEvent.receiver, dataChannelEvent.message);
+        // TODO: Add message to chat repository.
       }
     }
   }
