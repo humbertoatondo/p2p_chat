@@ -1,29 +1,51 @@
+import 'package:chats_repository/chats_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:p2p_chat/peer/peer.dart';
 import 'package:peer_repository/peer_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/chat_bloc.dart';
+
 class ChatPage extends StatelessWidget {
   ChatPage({
     Key key,
     @required String endUsername,
-    @required PeerRepository peerRepository,
+    @required ChatsRepository chatsRepository,
+    @required PeerBloc peerBloc,
+    @required ChatBloc chatBloc,
   })  : assert(endUsername != null),
-        assert(peerRepository != null),
+        assert(chatsRepository != null),
+        assert(peerBloc != null),
+        assert(chatBloc != null),
         _endUsername = endUsername,
-        _peerRepository = peerRepository,
+        _chatsRepository = chatsRepository,
+        _peerBloc = peerBloc,
+        _chatBloc = chatBloc,
         super(key: key);
 
   final String _endUsername;
-  final PeerRepository _peerRepository;
+  final ChatsRepository _chatsRepository;
+  final PeerBloc _peerBloc;
+  final ChatBloc _chatBloc;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PeerBloc(
-        peerRepository: _peerRepository,
-      ),
-      child: ChatView(endUsername: _endUsername),
+    _chatsRepository.createChatIfAbsent(_endUsername);
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          lazy: false,
+          create: (context) => _peerBloc,
+        ),
+        BlocProvider(
+          lazy: false,
+          create: (context) => _chatBloc,
+        ),
+      ],
+      child: ChatView(
+          endUsername: _endUsername,
+          initialMessagesListSize: _chatsRepository.getChatMessages(_endUsername).length),
     );
   }
 }
@@ -32,10 +54,13 @@ class ChatView extends StatefulWidget {
   ChatView({
     Key key,
     @required String this.endUsername,
+    @required int this.initialMessagesListSize,
   })  : assert(endUsername != null),
+        assert(initialMessagesListSize != null),
         super(key: key);
 
   final endUsername;
+  final initialMessagesListSize;
 
   @override
   _ChatViewState createState() => _ChatViewState();
@@ -43,6 +68,13 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   TextEditingController _textMessageController = TextEditingController();
+  final _animatedMessageListKey = GlobalKey<AnimatedListState>();
+  int _currentMessageListSize;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   dispose() {
@@ -52,6 +84,8 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
+    _currentMessageListSize = widget.initialMessagesListSize;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.endUsername),
@@ -59,8 +93,22 @@ class _ChatViewState extends State<ChatView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Container(),
+          BlocListener<ChatBloc, ChatState>(
+            listener: (context, state) {
+              if (state is MessageAddedToChat) {
+                _animatedMessageListKey.currentState.insertItem(_currentMessageListSize);
+                _currentMessageListSize++;
+              }
+            },
+            child: Expanded(
+              child: AnimatedList(
+                key: _animatedMessageListKey,
+                initialItemCount: widget.initialMessagesListSize,
+                itemBuilder: (context, index, animation) {
+                  return ChatMessageCell();
+                },
+              ),
+            ),
           ),
           Container(
             height: 50,
@@ -100,6 +148,20 @@ class _ChatViewState extends State<ChatView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ChatMessageCell extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        border: Border.all(width: 2),
+        color: Colors.yellow[300],
       ),
     );
   }

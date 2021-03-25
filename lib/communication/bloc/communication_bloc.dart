@@ -55,7 +55,6 @@ class CommunicationBloc extends Bloc<CommunicationEvent, CommunicationState> {
       var offer = await _peerRepository.createOffer(_user.username, event.receiverUsername);
       var encodedOffer = json.encode(offer);
       _communicationRepository.sendData(encodedOffer);
-      print(encodedOffer);
     }
   }
 

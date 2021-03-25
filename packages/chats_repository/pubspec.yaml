@@ -1,0 +1,12 @@
+name: chats_repository
+description: Dart package which manages user's active chats.
+publish_to: none
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  equatable: ^2.0.0

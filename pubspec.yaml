@@ -41,6 +41,8 @@ dependencies:
     path: packages/communication_repository
   peer_repository:
     path: packages/peer_repository
+  chats_repository:
+    path: packages/chats_repository
 
 dev_dependencies:
   flutter_test:

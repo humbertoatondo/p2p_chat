@@ -1,3 +1,4 @@
+import 'package:chats_repository/chats_repository.dart';
 import 'package:communication_repository/communication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,14 +19,18 @@ class HomePage extends StatelessWidget {
     Key key,
     CommunicationRepository communicationRepository,
     PeerRepository peerRepository,
+    PeerBloc peerBloc,
   })  : assert(communicationRepository != null),
         assert(peerRepository != null),
+        assert(peerBloc != null),
         _communicationRepository = communicationRepository,
         _peerRepository = peerRepository,
+        _peerBloc = peerBloc,
         super(key: key);
 
   final CommunicationRepository _communicationRepository;
   final PeerRepository _peerRepository;
+  final PeerBloc _peerBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +52,8 @@ class HomePage extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (context) => PeerBloc(
-            peerRepository: _peerRepository,
-          ),
+          lazy: false,
+          create: (context) => _peerBloc,
         ),
       ],
       child: HomeView(),

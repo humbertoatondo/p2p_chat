@@ -25,4 +25,13 @@ class SendTextMessage extends DataChannelEvent {
 
   @override
   List<Object> get props => [message, receiver];
+
+  String getEncodedMessage() {
+    final encodedMessage = json.encode({
+      "timestamp": DateTime.now().millisecondsSinceEpoch,
+      "message": message,
+    });
+
+    return encodedMessage;
+  }
 }

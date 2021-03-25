@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:peer_repository/peer_repository.dart';
 import 'package:peer_repository/src/models/models.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 
@@ -15,9 +14,6 @@ class DataTransferType {
   static const String offer = "offer";
   static const String answer = "answer";
   static const String candidates = "candidates";
-
-  @override
-  List<Object> get props => [offer, answer, candidates];
 }
 
 class PeerRepository {
@@ -31,10 +27,14 @@ class PeerRepository {
   }
 
   void sendMessage(String receiver, String message) {
-    _peerConnections[receiver].dataChannel.send(RTCDataChannelMessage(message));
-    _peerConnections.forEach((key, value) {
-      print("$key: $value");
+    // Encode the message with the current timestamp.
+    // TODO: Fix timestamp different in sender and receiver.
+    final encodedMessage = json.encode({
+      "timestamp": DateTime.now().millisecondsSinceEpoch,
+      "message": message,
     });
+    // Send encoded message through data channel.
+    _peerConnections[receiver].dataChannel.send(RTCDataChannelMessage(encodedMessage));
   }
 
   Future<void> _createPeerConnection(String username) async {
@@ -132,6 +132,7 @@ class PeerRepository {
 
           dataChannel.onMessage = (message) {
             print(message.text);
+            _controller.add(ReceiveTextMessage(message.text, map["sender"]));
           };
         };
         // Set remote descripiton
@@ -142,16 +143,7 @@ class PeerRepository {
       case DataTransferType.answer:
         // Set remote description
         await _setRemoteDescription(map["sdp"], DataTransferType.answer, map["sender"]);
-        // Get ice candidates
-        // _peerConnections[map["sender"]].peerConnection.onDataChannel = (dataChannel) {
-        //   dataChannel.onMessage = (message) {
-        //     print(message.text);
-        //   };
 
-        //   dataChannel.onDataChannelState = (state) {
-        //     print("$state");
-        //   };
-        // };
         return _getIceCandidates(map["receiver"], map["sender"]);
         break;
       case DataTransferType.candidates:
