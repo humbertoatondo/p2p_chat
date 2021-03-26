@@ -27,13 +27,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Stream<ChatState> mapEventToState(
     ChatEvent event,
   ) async* {
-    // TODO: implement mapEventToState
     if (event is ChatMessageEventOccurred) {
       final chatMessageEvent = event.chatMessageEvent;
       if (chatMessageEvent is ChatMessageAdded) {
-        final username = chatMessageEvent.sender;
-        yield MessageAddedToChat();
-
+        yield MessageAddedToChat(chatMessageEvent.previousPosition);
         yield IdleChat();
       }
     }

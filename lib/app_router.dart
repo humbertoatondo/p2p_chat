@@ -38,7 +38,9 @@ class AppRouter {
           builder: (context) => HomePage(
             communicationRepository: _communicationRepository,
             peerRepository: _peerRepository,
+            chatsRepository: _chatsRepository,
             peerBloc: _peerBloc,
+            chatBloc: _chatBloc,
           ),
         );
       case '/chat':

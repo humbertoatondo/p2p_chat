@@ -1,6 +1,8 @@
 part of 'home_page.dart';
 
 class SearchAppBar extends AppBar {
+  final TextEditingController searchTextController = TextEditingController();
+
   SearchAppBar({
     Key key,
     @required BuildContext context,
@@ -12,6 +14,9 @@ class SearchAppBar extends AppBar {
               height: 36,
               margin: EdgeInsets.all(12),
               child: TextField(
+                onEditingComplete: () {
+                  print("editado");
+                },
                 onChanged: (username) {
                   context.read<HomeBloc>().add(SearchInputChanged(username));
                 },

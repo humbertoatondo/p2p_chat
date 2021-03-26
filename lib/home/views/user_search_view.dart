@@ -44,6 +44,7 @@ class UserListViewCell extends StatelessWidget {
           '/chat',
           arguments: username,
         );
+        context.read<HomeBloc>().add(SearchInputChanged(""));
       },
       child: Container(
         width: double.infinity,

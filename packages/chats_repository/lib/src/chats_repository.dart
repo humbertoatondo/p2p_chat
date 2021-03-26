@@ -15,8 +15,9 @@ abstract class ChatMessageEvent extends Equatable {
 class ChatMessageAdded extends ChatMessageEvent {
   final String sender;
   final String encodedMessage;
+  final int previousPosition;
 
-  const ChatMessageAdded(this.sender, this.encodedMessage);
+  const ChatMessageAdded(this.sender, this.encodedMessage, this.previousPosition);
 
   @override
   List<Object> get props => [sender, encodedMessage];
@@ -52,9 +53,12 @@ class ChatsRepository {
     DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(map["timestamp"]);
     String message = map["message"];
 
+    int previousPosition = -1;
     ChatMessages chatMessages = ChatMessages();
     // If key exists in _chatsMap delete previous key and add it to the end.
     if (_chatsMap.containsKey(sender)) {
+      // Getting the previous position here makes it easier to update the chat animated list.
+      previousPosition = getChatIndex(sender);
       chatMessages = _chatsMap[sender];
       _chatsMap.remove(sender);
     }
@@ -64,11 +68,29 @@ class ChatsRepository {
     _chatsMap.putIfAbsent(sender, () => chatMessages);
 
     // Stream message data to the ChatBloc.
-    _controller.add(ChatMessageAdded(sender, encodedMessage));
+    _controller.add(ChatMessageAdded(sender, encodedMessage, previousPosition));
   }
 
   List<ChatMessage> getChatMessages(String username) {
     return _chatsMap[username].messages;
+  }
+
+  List<String> getChatsUsernames() {
+    return _chatsMap.keys.toList();
+  }
+
+  int getChatIndex(String username) {
+    int position = -1;
+    int currentIndex = 0;
+    _chatsMap.forEach((key, value) {
+      if (key.compareTo(username) == 0) {
+        position = currentIndex;
+        return position;
+      }
+      currentIndex++;
+    });
+
+    return position;
   }
 
   void dispose() {

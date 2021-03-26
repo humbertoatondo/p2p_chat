@@ -9,4 +9,11 @@ abstract class ChatState extends Equatable {
 
 class IdleChat extends ChatState {}
 
-class MessageAddedToChat extends ChatState {}
+class MessageAddedToChat extends ChatState {
+  final int previousChatPositionInList;
+
+  MessageAddedToChat(this.previousChatPositionInList);
+
+  @override
+  List<Object> get props => [previousChatPositionInList];
+}
