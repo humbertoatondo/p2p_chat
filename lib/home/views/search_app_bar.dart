@@ -14,9 +14,6 @@ class SearchAppBar extends AppBar {
               height: 36,
               margin: EdgeInsets.all(12),
               child: TextField(
-                onEditingComplete: () {
-                  print("editado");
-                },
                 onChanged: (username) {
                   context.read<HomeBloc>().add(SearchInputChanged(username));
                 },

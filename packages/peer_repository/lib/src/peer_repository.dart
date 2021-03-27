@@ -34,6 +34,9 @@ class PeerRepository {
       "message": message,
     });
     // Send encoded message through data channel.
+    _peerConnections.forEach((key, value) {
+      print("$key, $value");
+    });
     _peerConnections[receiver].dataChannel.send(RTCDataChannelMessage(encodedMessage));
   }
 
@@ -126,6 +129,8 @@ class PeerRepository {
         }
         // Test data channel
         _peerConnections[map["sender"]].peerConnection.onDataChannel = (dataChannel) {
+          _peerConnections[map["sender"]].dataChannel = dataChannel;
+
           dataChannel.onDataChannelState = (state) {
             print("$state");
           };
