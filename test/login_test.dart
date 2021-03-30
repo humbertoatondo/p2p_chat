@@ -1,17 +1,12 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:p2p_chat/app.dart';
+import 'package:p2p_chat/authentication/authentication.dart';
+import 'package:p2p_chat/login/login.dart';
 
-import 'package:p2p_chat/main.dart';
 import 'package:user_repository/user_repository.dart';
 
 class MockAuthenticationRepository extends Mock implements AuthenticationRepository {}
@@ -19,12 +14,24 @@ class MockAuthenticationRepository extends Mock implements AuthenticationReposit
 class MockUserRepository extends Mock implements UserRepository {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Given user in login page', (WidgetTester tester) async {
+    final _mockAuthenticationRepository = MockAuthenticationRepository();
+    final _mockUserRepository = MockUserRepository();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(App(
-      authenticationRepository: AuthenticationRepository(),
-      userRepository: UserRepository(),
+    await tester.pumpWidget(RepositoryProvider.value(
+      value: _mockAuthenticationRepository,
+      child: BlocProvider(
+        create: (_) => AuthenticationBloc(
+          authenticationRepository: _mockAuthenticationRepository,
+          userRepository: _mockUserRepository,
+        ),
+        child: MaterialApp(
+          home: LoginPage(),
+        ),
+      ),
     ));
+
+    expect(find.widgetWithText(ElevatedButton, "Login"), findsOneWidget);
 
     // Verify that our counter starts at 0.
     // expect(find.text('0'), findsOneWidget);
