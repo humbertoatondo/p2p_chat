@@ -24,10 +24,11 @@ class ChatMessageAdded extends ChatMessageEvent {
 }
 
 class ChatMessage {
-  const ChatMessage(this.timestamp, this.message);
+  const ChatMessage(this.timestamp, this.message, this.messageOwner);
 
   final DateTime timestamp;
   final dynamic message;
+  final String messageOwner;
 }
 
 class ChatMessages {
@@ -47,7 +48,7 @@ class ChatsRepository {
     _chatsMap.putIfAbsent(username, () => ChatMessages());
   }
 
-  void addMessage(String sender, String encodedMessage) {
+  void addMessage(String messageOwner, String sender, String encodedMessage) {
     // Obtain values from encoded message.
     var map = json.decode(encodedMessage);
     DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(map["timestamp"]);
@@ -63,7 +64,7 @@ class ChatsRepository {
       _chatsMap.remove(sender);
     }
     // Create new ChatMessage and add it to its corresponding list in the map.
-    ChatMessage newChatMessage = ChatMessage(timestamp, message);
+    ChatMessage newChatMessage = ChatMessage(timestamp, message, messageOwner);
     chatMessages.messages.add(newChatMessage);
     _chatsMap.putIfAbsent(sender, () => chatMessages);
 
@@ -73,6 +74,12 @@ class ChatsRepository {
 
   List<ChatMessage> getChatMessages(String username) {
     return _chatsMap[username].messages;
+  }
+
+  ChatMessage getChatMessageAt(String username, int index) {
+    print(username);
+    print(index);
+    return _chatsMap[username].messages[index];
   }
 
   List<String> getChatsUsernames() {

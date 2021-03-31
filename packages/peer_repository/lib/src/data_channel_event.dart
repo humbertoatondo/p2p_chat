@@ -20,8 +20,9 @@ class ReceiveTextMessage extends DataChannelEvent {
 class SendTextMessage extends DataChannelEvent {
   final String message;
   final String receiver;
+  final String messageOwner;
 
-  const SendTextMessage(this.message, this.receiver);
+  const SendTextMessage(this.message, this.receiver, this.messageOwner);
 
   @override
   List<Object> get props => [message, receiver];

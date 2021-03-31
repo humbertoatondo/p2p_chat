@@ -36,13 +36,14 @@ class PeerBloc extends Bloc<PeerEvent, PeerState> {
       final dataChannelEvent = event.dataChannelEvent;
       if (dataChannelEvent is ReceiveTextMessage) {
         // Add the received message to chat repository.
-        _chatsRepository.addMessage(dataChannelEvent.sender, dataChannelEvent.message);
+        _chatsRepository.addMessage(
+            dataChannelEvent.sender, dataChannelEvent.sender, dataChannelEvent.message);
       } else if (dataChannelEvent is SendTextMessage) {
         // Send message to corresponding peer.
         _peerRepository.sendMessage(dataChannelEvent.receiver, dataChannelEvent.message);
         // Add message to the current chat.
-        _chatsRepository.addMessage(
-            dataChannelEvent.receiver, dataChannelEvent.getEncodedMessage());
+        _chatsRepository.addMessage(dataChannelEvent.messageOwner, dataChannelEvent.receiver,
+            dataChannelEvent.getEncodedMessage());
       }
     }
   }

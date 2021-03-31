@@ -94,15 +94,18 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SearchAppBar(context: context),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is Idle) {
-            return ChatListView(
-              chatsRepository: widget.chatsRepository,
-            );
-          }
-          return UserSearchView();
-        },
+      body: SafeArea(
+        top: false,
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            if (state is Idle) {
+              return ChatListView(
+                chatsRepository: widget.chatsRepository,
+              );
+            }
+            return UserSearchView();
+          },
+        ),
       ),
       // body: Center(
       //   child: Column(

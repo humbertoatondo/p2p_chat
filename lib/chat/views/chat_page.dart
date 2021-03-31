@@ -1,8 +1,10 @@
 import 'package:chats_repository/chats_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:p2p_chat/authentication/authentication.dart';
 import 'package:p2p_chat/peer/peer.dart';
 import 'package:peer_repository/peer_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:user_repository/user_repository.dart';
 
 import '../bloc/chat_bloc.dart';
 
@@ -43,9 +45,13 @@ class ChatPage extends StatelessWidget {
           create: (context) => _chatBloc,
         ),
       ],
-      child: ChatView(
+      child: RepositoryProvider(
+        create: (context) => _chatsRepository,
+        child: ChatView(
           endUsername: _endUsername,
-          initialMessagesListSize: _chatsRepository.getChatMessages(_endUsername).length),
+          initialMessagesListSize: _chatsRepository.getChatMessages(_endUsername).length,
+        ),
+      ),
     );
   }
 }
@@ -71,6 +77,8 @@ class _ChatViewState extends State<ChatView> {
   final _animatedMessageListKey = GlobalKey<AnimatedListState>();
   int _currentMessageListSize;
 
+  User user;
+
   @override
   void initState() {
     super.initState();
@@ -86,82 +94,125 @@ class _ChatViewState extends State<ChatView> {
   Widget build(BuildContext context) {
     _currentMessageListSize = widget.initialMessagesListSize;
 
+    final bloc = BlocProvider.of<AuthenticationBloc>(context);
+    final user = (bloc.state as AuthenticatedState).user;
+
     return Scaffold(
+      backgroundColor: Colors.blue[500],
       appBar: AppBar(
         title: Text(widget.endUsername),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          BlocListener<ChatBloc, ChatState>(
-            listener: (context, state) {
-              if (state is MessageAddedToChat) {
-                _animatedMessageListKey.currentState.insertItem(_currentMessageListSize);
-                _currentMessageListSize++;
-              }
-            },
-            child: Expanded(
-              child: AnimatedList(
-                key: _animatedMessageListKey,
-                initialItemCount: widget.initialMessagesListSize,
-                itemBuilder: (context, index, animation) {
-                  return ChatMessageCell();
-                },
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            BlocListener<ChatBloc, ChatState>(
+              listener: (context, state) {
+                if (state is MessageAddedToChat) {
+                  _animatedMessageListKey.currentState.insertItem(_currentMessageListSize);
+                  _currentMessageListSize++;
+                }
+              },
+              child: Expanded(
+                child: Container(
+                  color: Colors.white,
+                  child: AnimatedList(
+                    key: _animatedMessageListKey,
+                    initialItemCount: widget.initialMessagesListSize,
+                    itemBuilder: (context, index, animation) {
+                      final chatMessage = context
+                          .read<ChatsRepository>()
+                          .getChatMessageAt(widget.endUsername, index);
+                      final isMyMessage = user.username == chatMessage.messageOwner;
+                      print("${user.username} | ${chatMessage.messageOwner}");
+                      return ChatMessageCell(isMyMessage: isMyMessage, chatMessage: chatMessage);
+                    },
+                  ),
+                ),
               ),
             ),
-          ),
-          Container(
-            height: 50,
-            width: double.infinity,
-            color: Colors.blue,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.all(8),
-                    child: TextField(
-                      controller: _textMessageController,
-                      // focusNode: _focusNode,
-                      decoration: InputDecoration(
-                        hintText: "Message",
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(8),
+            Container(
+              height: 50,
+              width: double.infinity,
+              color: Colors.blue,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      child: TextField(
+                        controller: _textMessageController,
+                        // focusNode: _focusNode,
+                        decoration: InputDecoration(
+                          hintText: "Message",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.blue[800],
+                          contentPadding: EdgeInsets.only(left: 8, right: 8),
                         ),
-                        filled: true,
-                        fillColor: Colors.blue[800],
-                        contentPadding: EdgeInsets.only(left: 8, right: 8),
                       ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send_rounded),
-                  color: Colors.white,
-                  onPressed: () {
-                    context.read<PeerBloc>().add(DataChannelEventOccurred(
-                        SendTextMessage(_textMessageController.text, widget.endUsername)));
-                    _textMessageController.clear();
-                  },
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send_rounded),
+                    color: Colors.white,
+                    onPressed: () {
+                      context.read<PeerBloc>().add(DataChannelEventOccurred(SendTextMessage(
+                          _textMessageController.text, widget.endUsername, user.username)));
+                      _textMessageController.clear();
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class ChatMessageCell extends StatelessWidget {
+  ChatMessageCell({
+    Key key,
+    @required this.isMyMessage,
+    @required this.chatMessage,
+  }) : super(key: key);
+
+  final bool isMyMessage;
+  final ChatMessage chatMessage;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        border: Border.all(width: 2),
-        color: Colors.yellow[300],
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Container(
+        child: Column(
+          crossAxisAlignment: this.isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: 150,
+                maxWidth: MediaQuery.of(context).size.width * 0.85,
+                minHeight: 35,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(4.0),
+                decoration: BoxDecoration(
+                  color: this.isMyMessage ? Colors.blue[600] : Colors.grey[600],
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                child: Text(
+                  chatMessage.message.toString(),
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
